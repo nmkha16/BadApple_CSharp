@@ -31,6 +31,22 @@ namespace Utils{
 
 			return result;
 		}
-        
+    }
+    
+    public static class ProgressBar{
+        public static string GetProgressbar(float progress, int pBarSize ){
+            string output = "[";
+            float step = 1f/pBarSize;
+            for (int i = 1; i <= pBarSize; ++i){
+                if (progress >= step * i){
+                    output += "#";
+                }
+                else{
+                    output+= "-";
+                }
+            }
+            output += "]";
+            return output;
+        }
     }
 }

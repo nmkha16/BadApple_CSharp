@@ -9,28 +9,34 @@ namespace BadApple{
     class Program{
         static int maxThreads = 6;
         static int frameRate = 30;
-        static int width = 80;
+        static int width = 100;
         static int height = 50;
         static int nframeConverted = 0;
+        static int progressBarSize = 40;
+        static string videoPath = @"video\badapple.mp4";
+        static string audioPath = @"audio.wav";
+        static string framePath = @"frames";
 
         public static void Main(string[] args){
+            string home = Directory.GetCurrentDirectory();
+            videoPath = Path.Combine(home,videoPath);
+            framePath = Path.Combine(home,framePath);
             //SET DEFAULT SIZE
 			Console.SetWindowSize(width,height);
             int nframes;
             float frameRateInterval = 1000 / (float)frameRate;
 
-
-            string home = "D:\\Study\\something\\BadAppleASCII";
             // EXTRACTING FRAME
-            ExtractFrame(Path.Combine(home , "video\\badapple.mp4"), Path.Combine(home,"frames"),out nframes);
-            nframes = 1000;
-            Console.Clear();
+            Console.WriteLine("Extracting Frames...");
+            ExtractFrame(videoPath, framePath, out nframes);
+
+            Console.WriteLine("Convert All Frames To ASCII");
 
             // CONVERSION TO ASCII
             string[] asciiFrames = new string[nframes];
 
             // MUST SORT FRAME FILES
-            var frameFiles = Directory.GetFiles(Path.Combine(home,"frames"));
+            var frameFiles = Directory.GetFiles(framePath);
             var sorted =  frameFiles.Select(f=> new FileInfo(f)).OrderBy(f=> f.CreationTime);
             {
                 int i =0;
@@ -52,15 +58,19 @@ namespace BadApple{
                 thread.Start();
             }
 
-            // WAIT until all frames ascii converting complete
+            // WAIT until all frames ascii converting complete sfrom all threads
             while (nframeConverted != nframes){
-                // maybe do something on progressbar
+                float progress = nframeConverted * 1.0f/nframes;
+                Console.Title = $"Converting Frames: ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
             }
+            Console.Title = $"Converting Frames: ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
+            Console.WriteLine("Done Converting Frames");
 
+            Console.Write("Enter anything to continue...");
+            Console.Read();
             Console.Clear();
 
-            // Play AUDIO
-            string audioPath = Path.Combine(home,"audio.wav");
+            //PLAY AUDIO
             var audio = new SoundPlayer(audioPath);
             audio.Play();
             
@@ -68,7 +78,7 @@ namespace BadApple{
             Stopwatch playbackWatch = new Stopwatch();
             playbackWatch.Start();
             int currentPlayingFrame = 0;
-            while (currentPlayingFrame < nframes){
+            while (currentPlayingFrame < nframeConverted){
                 if (playbackWatch.ElapsedMilliseconds % (int)frameRateInterval == 0){
                     int frameIndex = (int)Math.Floor(playbackWatch.ElapsedMilliseconds / frameRateInterval);
                     
@@ -81,12 +91,15 @@ namespace BadApple{
                         Console.SetCursorPosition(0,0);
                         FastConsole.WriteLine(asciiFrames[frameIndex]);
                         FastConsole.Flush();
-                        currentPlayingFrame = frameIndex;   
+                        currentPlayingFrame = frameIndex;
 
-                        Console.Title = "Frame " + currentPlayingFrame.ToString();
+                        float progress = currentPlayingFrame * 1.0f / nframeConverted;
+                        Console.Title = $"Playing Frames ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
                     }
                 }
             }
+
+            Console.Title = $"Playing Frames ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
 
             playbackWatch.Stop();
             audio.Stop();
@@ -107,14 +120,17 @@ namespace BadApple{
         private static void ExtractFrame(string path, string output, out int totalFrame){
             int i = 0;
             var watch = new System.Diagnostics.Stopwatch();
-
+            if (!Directory.Exists(output))
+            {
+                Directory.CreateDirectory(output);
+            }
             watch.Start();
             using (var video = new VideoCapture(path)){
                 totalFrame = (int) video.Get(Emgu.CV.CvEnum.CapProp.FrameCount);
                 using var img = new Mat();
                 while (video.Grab())
                 {
-                    var filename = Path.Combine(output, $"{i++}.bmp");
+                    var filename = Path.Combine(output, $"{i}.bmp");
                     // before retrieving and writing bmp we should check if file already existed?
                     if (File.Exists(filename)){
                         // Console.WriteLine(filename + " existed.");
@@ -122,8 +138,12 @@ namespace BadApple{
                     }
                     video.Retrieve(img);
                     CvInvoke.Imwrite(filename, img);
+                    float progress  = i * 1.0f / totalFrame;
+                    Console.Title = $"Extracting Frames ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
+                    i++;
                 }
-                Console.WriteLine($"Done extracting frame in {watch.ElapsedMilliseconds/1000} s!");
+                Console.Title = $"Extracting Frames ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
+                Console.WriteLine($"Done extracting frame in {watch.ElapsedMilliseconds/1000} s!\n");
             }
             watch.Stop();
         }
