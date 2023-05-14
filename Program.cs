@@ -18,9 +18,11 @@ namespace BadApple{
         static string framePath = @"frames";
 
         public static void Main(string[] args){
+            // SET PATH
             string home = Directory.GetCurrentDirectory();
             videoPath = Path.Combine(home,videoPath);
             framePath = Path.Combine(home,framePath);
+
             //SET DEFAULT SIZE
 			Console.SetWindowSize(width,height);
             int nframes;
@@ -54,13 +56,17 @@ namespace BadApple{
                     to += nframes - to;
                 }
                 
-                Thread thread = new(() => ConvertToASCII(tid,frameFiles, asciiFrames,from,to));
+                Thread thread = new(() => ConvertToASCII(frameFiles, asciiFrames,from,to));
                 thread.Start();
             }
 
             // WAIT until all frames ascii converting complete sfrom all threads
             while (nframeConverted != nframes){
                 float progress = nframeConverted * 1.0f/nframes;
+                //fail-safe check
+                if (nframeConverted >= nframes - 1){
+                    break;
+                }
                 Console.Title = $"Converting Frames: ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
             }
             Console.Title = $"Converting Frames: ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
@@ -107,14 +113,14 @@ namespace BadApple{
             Console.ReadLine();
         }
 
-        private static void ConvertToASCII(int tid, string[] frameFiles, string[] asciiFrames, int from, int to){
+        private static void ConvertToASCII(string[] frameFiles, string[] asciiFrames, int from, int to){
             for (int i = from; i < to; ++i)
             {
                 string ascii = Utils.Converter.ASCIIConverter(frameFiles[i],width,height);
                 asciiFrames[i] = ascii;
                 nframeConverted++;
             }
-            Console.WriteLine($"Thread {tid} done converting to ascii!");
+            //Console.WriteLine($"Thread {tid} done converting to ascii!");
         }
 
         private static void ExtractFrame(string path, string output, out int totalFrame){
@@ -143,7 +149,7 @@ namespace BadApple{
                     i++;
                 }
                 Console.Title = $"Extracting Frames ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
-                Console.WriteLine($"Done extracting frame in {watch.ElapsedMilliseconds/1000} s!\n");
+                Console.WriteLine($"Done extracting frame in {watch.ElapsedMilliseconds/1000} s");
             }
             watch.Stop();
         }
