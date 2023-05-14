@@ -9,5 +9,5 @@ This is pretty simple, let break it down to three steps.
 
 Important Notices:
 ```
-The directory is hardcoded so include **video/badapple.mp4** and **audio.wav** to your project file or release folder.
+The directory is hardcoded so include 'video/badapple.mp4' and 'audio.wav' to your project file or release folder.
 ```
