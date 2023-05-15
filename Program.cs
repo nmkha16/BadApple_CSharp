@@ -8,14 +8,16 @@ using Emgu.CV;
 namespace BadApple{
     class Program{
         static int maxThreads = 6;
-        static int frameRate = 30;
+        static int frameRate
+         = 30;
         static int width = 90;
-        static int height = 60;
+        static int height = 45;
         static int nframeConverted = 0;
         static int progressBarSize = 40;
         static string videoPath = @"video\badapple.mp4";
         static string audioPath = @"audio.wav";
         static string framePath = @"frames";
+        static int threadCompleted = 0;
 
         public static void Main(string[] args){
             // SET PATH
@@ -63,13 +65,13 @@ namespace BadApple{
             // WAIT until all frames ascii converting complete from all threads
             while (nframeConverted != nframes){
                 float progress = nframeConverted * 1.0f/nframes;
-                //fail-safe check, idk i'm too lazy to keep track actual threads complete so i just do the lazy way
-                if (nframeConverted >= nframes - 1){
+                //fail-safe check
+                if (threadCompleted == maxThreads){
                     break;
                 }
-                Console.Title = $"Converting Frames: ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
+                Console.Title = $"Converting Frames {nframeConverted}/{nframes} ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
             }
-            Console.Title = $"Converting Frames: ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
+            Console.Title = $"Converting Frames: {nframeConverted}/{nframes} ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
             Console.WriteLine("Done Converting Frames");
 
             Console.Write("Enter anything to continue...");
@@ -100,12 +102,12 @@ namespace BadApple{
                         currentPlayingFrame = frameIndex;
 
                         float progress = currentPlayingFrame * 1.0f / nframeConverted;
-                        Console.Title = $"Playing Frames ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
+                        Console.Title = $"Playing Frames {currentPlayingFrame}/{nframeConverted} ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
                     }
                 }
             }
 
-            Console.Title = $"Playing Frames ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
+            Console.Title = $"Playing Frames {nframeConverted}/{nframeConverted} ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
 
             playbackWatch.Stop();
             audio.Stop();
@@ -120,6 +122,7 @@ namespace BadApple{
                 asciiFrames[i] = ascii;
                 nframeConverted++;
             }
+            threadCompleted++;
             //Console.WriteLine($"Thread {tid} done converting to ascii!");
         }
 
