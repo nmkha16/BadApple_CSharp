@@ -9,8 +9,8 @@ namespace BadApple{
     class Program{
         static int maxThreads = 6;
         static int frameRate = 30;
-        static int width = 100;
-        static int height = 50;
+        static int width = 90;
+        static int height = 60;
         static int nframeConverted = 0;
         static int progressBarSize = 40;
         static string videoPath = @"video\badapple.mp4";
@@ -24,7 +24,7 @@ namespace BadApple{
             framePath = Path.Combine(home,framePath);
 
             //SET DEFAULT SIZE
-			Console.SetWindowSize(width,height);
+            Console.SetWindowSize(width,height);
             int nframes;
             float frameRateInterval = 1000 / (float)frameRate;
 
@@ -60,10 +60,10 @@ namespace BadApple{
                 thread.Start();
             }
 
-            // WAIT until all frames ascii converting complete sfrom all threads
+            // WAIT until all frames ascii converting complete from all threads
             while (nframeConverted != nframes){
                 float progress = nframeConverted * 1.0f/nframes;
-                //fail-safe check
+                //fail-safe check, idk i'm too lazy to keep track actual threads complete so i just do the lazy way
                 if (nframeConverted >= nframes - 1){
                     break;
                 }
@@ -123,6 +123,12 @@ namespace BadApple{
             //Console.WriteLine($"Thread {tid} done converting to ascii!");
         }
 
+        /// <summary>
+        /// Extract frames from video then write them to bmp
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="output"></param>
+        /// <param name="totalFrame"></param>
         private static void ExtractFrame(string path, string output, out int totalFrame){
             int i = 0;
             var watch = new System.Diagnostics.Stopwatch();
@@ -154,8 +160,7 @@ namespace BadApple{
             watch.Stop();
         }
 
-
-
+        // I/O operation isn't faster in multi-threaded, just stick to single thread
         // private static void ExtractFrameMultiThread(string path, string output, out int totalFrame){
         //     //var watch = new System.Diagnostics.Stopwatch();
 
