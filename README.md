@@ -1,7 +1,9 @@
 # BadApple_CSharp
 
+From: https://youtu.be/jAOrhnVlBJk
+
 This is pretty simple, let break it down to three steps.
-1. Extract all frames from Video then convert all said frames to bitmap (can be anything jpg, png...).
+1. Extract all frames from a video then convert all said frames to bitmap (can be anything jpg, png...).
 
 2. Convert all bitmaps to ASCII.
 
