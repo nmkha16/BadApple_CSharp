@@ -17,8 +17,6 @@ namespace BadApple{
         static string videoPath = @"video\badapple.mp4";
         static string audioPath = @"audio.wav";
         static string framePath = @"frames";
-        static int threadCompleted = 0;
-
         public static void Main(string[] args){
             // SET PATH
             string home = Directory.GetCurrentDirectory();
@@ -58,17 +56,13 @@ namespace BadApple{
                     to += nframes - to;
                 }
                 
-                Thread thread = new(() => ConvertToASCII(frameFiles, asciiFrames,from,to));
+                Thread thread = new(() => ConvertToASCII(tid, frameFiles, asciiFrames, from, to));
                 thread.Start();
             }
 
             // WAIT until all frames ascii converting complete from all threads
             while (nframeConverted != nframes){
                 float progress = nframeConverted * 1.0f/nframes;
-                //fail-safe check
-                if (threadCompleted == maxThreads){
-                    break;
-                }
                 Console.Title = $"Converting Frames {nframeConverted}/{nframes} ({(int) (progress * 100)}%) " + Utils.ProgressBar.GetProgressbar(progress,progressBarSize);
             }
             Console.Title = $"Converting Frames: {nframeConverted}/{nframes} ({100}%) " + Utils.ProgressBar.GetProgressbar(1,progressBarSize);
@@ -115,15 +109,14 @@ namespace BadApple{
             Console.ReadLine();
         }
 
-        private static void ConvertToASCII(string[] frameFiles, string[] asciiFrames, int from, int to){
+        private static void ConvertToASCII(int tid, string[] frameFiles, string[] asciiFrames, int from, int to){
             for (int i = from; i < to; ++i)
             {
                 string ascii = Utils.Converter.ASCIIConverter(frameFiles[i],width,height);
                 asciiFrames[i] = ascii;
-                nframeConverted++;
+                Interlocked.Increment(ref nframeConverted);
             }
-            threadCompleted++;
-            //Console.WriteLine($"Thread {tid} done converting to ascii!");
+            Console.WriteLine($"Thread {tid} done converting to ascii!");
         }
 
         /// <summary>
