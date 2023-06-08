@@ -2,6 +2,11 @@
 
 Showcase: https://youtu.be/X0TGrCcCIYg
 
+
+https://github.com/nmkha16/BadApple_CSharp/assets/91834063/3153da33-d16c-4478-911f-6b5a7fcf8309
+
+
+
 This is pretty simple, let break it down to three steps.
 1. Extract all frames from a video then convert all said frames to bitmap (can be anything jpg, png...).
 
