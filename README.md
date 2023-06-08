@@ -1,6 +1,6 @@
 # BadApple_CSharp
 
-From: https://youtu.be/jAOrhnVlBJk
+Showcase: https://youtu.be/X0TGrCcCIYg
 
 This is pretty simple, let break it down to three steps.
 1. Extract all frames from a video then convert all said frames to bitmap (can be anything jpg, png...).
